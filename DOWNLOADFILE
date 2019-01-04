@@ -1,0 +1,270 @@
+**************************************************FORMS**************************************************
+
+//**IDownloadService**//
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using static MyDua.Utils.DownloadService;
+
+namespace MyDua.Interfaces
+{
+    public interface IDownloadService
+    {
+        Task DownloadFileAsync(DelegateErrorDownload delegateError, string url, string filename,IProgress<double> progress, CancellationToken token);
+    }
+}
+
+//**cs DownloadService**//
+
+using System;
+using System.IO;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using MyDua.Interfaces;
+using MyDua.Model;
+using Xamarin.Forms;
+
+namespace MyDua.Utils
+{
+    public class DownloadService : IDownloadService
+    {
+        /// <summary>
+        /// The http client.
+        /// </summary>
+        private HttpClient _client;
+
+        /// <summary>
+        /// The file service.
+        /// </summary>
+        private string _filepath;
+
+        /// <summary>
+        /// The size of the buffer.
+        /// </summary>
+        private int bufferSize = 4095;
+
+
+        public DownloadService(string localPath) //
+        {
+            _client = new HttpClient();
+
+            _filepath = localPath;//DependencyService.Get<IFileService>().GetStorageFolderPath();
+
+        }
+
+        /// <summary>
+        /// Downloads the file async.
+        /// </summary>
+        /// <returns>The file async.</returns>
+        /// <param name="url">URL.</param>
+        /// <param name="progress">Progress.</param>
+        /// <param name="token">Token.</param>
+        public async Task DownloadFileAsync(DelegateErrorDownload delegateError,string url,string filename ,IProgress<double> progress, CancellationToken token)
+        {
+            try
+            {
+                // Step 1 : Get call
+                var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    //throw new Exception(string.Format("The request returned with HTTP status code {0}", response.StatusCode));
+                    throw new Exception(CommonModel.getInstance().NO_AUDIO);
+                }
+
+                // Step 2 : Filename
+                var fileName = response.Content.Headers?.ContentDisposition?.FileName ?? filename;
+
+                // Step 3 : Get total of data
+                var totalData = response.Content.Headers.ContentLength.GetValueOrDefault(-1L);
+                var canSendProgress = totalData != -1L && progress != null;
+
+                // Step 4 : Get total of data
+                var filePath = Path.Combine(_filepath, fileName);
+
+                // Step 5 : Download data
+                using (var fileStream = OpenStream(filePath))
+                {
+                    using (var stream = await response.Content.ReadAsStreamAsync())
+                    {
+                        var totalRead = 0L;
+                        var buffer = new byte[bufferSize];
+                        var isMoreDataToRead = true;
+
+                        do
+                        {
+                            token.ThrowIfCancellationRequested();
+
+                            var read = await stream.ReadAsync(buffer, 0, buffer.Length, token);
+
+                            if (read == 0)
+                            {
+                                isMoreDataToRead = false;
+                            }
+                            else
+                            {
+                                // Write data on disk.
+                                await fileStream.WriteAsync(buffer, 0, read);
+
+                                totalRead += read;
+
+                                if (canSendProgress)
+                                {
+                                    progress.Report((totalRead * 1d) / (totalData * 1d) * 100);
+                                }
+                            }
+                        } while (isMoreDataToRead);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // Manage the exception as you need here.
+                System.Diagnostics.Debug.WriteLine(e.ToString());
+                delegateError(e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Opens the stream.
+        /// </summary>
+        /// <returns>The stream.</returns>
+        /// <param name="path">Path.</param>
+        private Stream OpenStream(string path)
+        {
+            return new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, bufferSize);
+        }
+
+        public delegate void DelegateErrorDownload(string error);
+    }
+}
+
+
+//**implementation**//
+
+private readonly IDownloadService _downloadService;
+
+--Add in constructor following
+ DownloadService service = new DownloadService(localpath);
+ _downloadService = service;
+ 
+ private double _progressValue;
+
+        public async Task StartDownloadAsync(string fileName)
+        {
+            var progressIndicator = new Progress<double>(ReportProgress);
+            var cts = new CancellationTokenSource();
+            try
+            {
+                IsDownloading = true;
+                var localpath = DependencyService.Get<IFileService>().GetStorageFolderPath();
+                var url = localpath + fileName;
+                //await new DownloadService().DownloadFileAsync(url, progressIndicator, cts.Token);
+                await _downloadService.DownloadFileAsync(ErrorDownlo, url, fileName, progressIndicator, cts.Token);
+            }
+            catch (OperationCanceledException ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
+                //Manage cancellation here
+            }
+            finally
+            {
+                //IsDownloading = false;
+            }
+        }
+
+        internal void ReportProgress(double value)
+        {
+            ProgressValue = value;
+            progressDialogs.PercentComplete = (int) value;
+             if((int)value >= 100)
+                this.ResultDownloadComplete("yes");
+        }
+
+        public double ProgressValue
+        {
+            get { return _progressValue; }
+            //set { Set(ref _progressValue, value); }
+            set { _progressValue = value; }
+        }
+
+        private bool _isDownloading;
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="T:XFDownloadProject.ViewModels.DownloadViewModel"/>
+        /// is downloading.
+        /// </summary>
+        /// <value><c>true</c> if is downloading; otherwise, <c>false</c>.</value>
+        public bool IsDownloading
+        {
+            get { return _isDownloading; }
+            // set { Set(ref _isDownloading, value); }
+            set { _isDownloading = value; }
+        }
+        
+        //** IFileService**//
+        using System;
+namespace MyDua.Interfaces
+{
+    public interface IFileService
+    {
+        String GetStorageFolderPath();
+    }
+}
+
+        **************************************************ANDROID**************************************************
+        //**DEPENDENCY FileService**//
+        
+using System;
+using MyDua.Droid;
+using MyDua.Interfaces;
+using Xamarin.Forms;
+
+[assembly: Dependency(typeof(FileService))]
+namespace MyDua.Droid
+{
+    public class FileService  : IFileService
+    {
+        public string GetStorageFolderPath()
+        {
+            //return Android.OS.Environment.ExternalStorageDirectory.Path;
+            return Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+        }
+    }
+}
+
+        **************************************************IOS**************************************************
+        
+-- IOS dont allow to download from http url. instead use https
+-- if http --> add following lines in Info.plist source -->
+NSAppTransportSecurity    Dictionary
+  NSExceptionDomains    Dictionary
+    website.com     Dictionary
+    NSIncludesSubdomains                              Boolean     yes
+    NSTemporaryExceptionAllowsInsecureHTTPLoads       Boolean     yes
+    
+//**DEPENDENCY FileService**//
+        
+        using System;
+using System.IO;
+using MyDua.Interfaces;
+using MyDua.iOS;
+using Xamarin.Forms;
+
+[assembly: Dependency(typeof(FileService))]
+namespace MyDua.iOS
+{
+    public class FileService : IFileService
+    {
+        public string GetStorageFolderPath()
+        {
+            string docFolder = Environment.GetFolderPath(Environment.SpecialFolder. Resources)+ "/Sounds";
+            string libFolder = docFolder;//Path.Combine(docFolder, "..", "Library/Sounds");
+            if (Directory.Exists(libFolder) == false)
+            {
+                Directory.CreateDirectory(libFolder);
+            }
+            return libFolder;
+        }
+    }
+}
