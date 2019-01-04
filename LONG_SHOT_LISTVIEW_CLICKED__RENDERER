@@ -1,0 +1,470 @@
+**************************************FORMS*********************************************
+
+//**CONTENTPAGE LISTVIEW**
+
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+             xmlns:d="clr-namespace:SlideOverKit;assembly=SlideOverKit" xmlns:cdview="clr-namespace:MyDua.Views;assembly=MyDua" 
+             xmlns:localEffects="clr-namespace:MyDua.Util" x:Class="MyDua.Views.DuaDetailPage" x:Name="MyPage" >
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical" BackgroundColor="#00B627">
+            <ListView x:Name="listView" BackgroundColor="#00B627" SelectedItem="{Binding SelcetedItem,Mode=TwoWay}" HasUnevenRows="true" SeparatorVisibility="None" ItemsSource="{Binding lstUsers}">
+                <ListView.Triggers>
+                    <EventTrigger Event="ItemSelected">
+                        <localEffects:CustomTriggersDeselect/>
+                    </EventTrigger>
+                </ListView.Triggers>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Frame IsClippedToBounds="True" HasShadow="True" Padding="0" BackgroundColor="White">
+                                <Frame.OutlineColor>
+                                    <OnPlatform x:TypeArguments="Color" Android="Gray" iOS="Gray" />
+                                </Frame.OutlineColor>
+                                <Frame.Margin>
+                                    <OnPlatform x:TypeArguments="Thickness" Android="10,5" iOS="10,5" />
+                                </Frame.Margin>
+                                <StackLayout Orientation="Vertical" Padding="10" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+                                    <cdview:DtlMenuViewTemplate ParentContext="{Binding BindingContext, Source={x:Reference MyPage}}"/>
+<!--                                    <StackLayout localEffects:LongPressedEffect.Command="{Binding Path=BindingContext.ItemLongPressCommand,Source={x:Reference MyPage}}" localEffects:LongPressedEffect.CommandParameter="{Binding .}">
+                                        <StackLayout.Effects>
+                                            <localEffects:LongPressedEffect />
+                                        </StackLayout.Effects>-->
+                                        <cdview:CardViewDetailTemplate ParentContext="{Binding BindingContext, Source={x:Reference MyPage}}"/>
+<!--                                    </StackLayout>-->
+                                </StackLayout>
+                            </Frame>
+                            <!--<cdview:CardViewDetailTemplate />-->
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
+
+//** cs **//
+-- in constructor
+ this.BindingContext = new DuaDetailViewModel(id);
+ 
+//**xaml cardviewtemplate
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:MyDua.Util;assembly=MyDua" x:Class="MyDua.Views.CardViewDetailTemplate" x:Name="cardDtlCell">
+    <ContentView.Content>
+        <!--<Frame IsClippedToBounds="True" HasShadow="True" Padding="0" BackgroundColor="White">
+            <Frame.OutlineColor>
+                <OnPlatform x:TypeArguments="Color" Android="Gray" iOS="Gray" />
+            </Frame.OutlineColor>
+            <Frame.Margin>
+                <OnPlatform x:TypeArguments="Thickness" Android="10,5" iOS="10,5" />
+            </Frame.Margin>-->
+        <StackLayout Orientation="Vertical" x:Name="MyLayout">
+            <!--<RelativeLayout Padding="10,0">
+                    <local:FontAwesomeIcon x:Name="iconArrow" FontSize="25" TextColor="#000000" />
+                    <StackLayout Orientation="Horizontal" x:Name="laymenuss" IsVisible="{Binding showSideMenus}" >
+                        <local:FontAwesomeIcon x:Name="iconShare" FontSize="25" TextColor="#000000" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" />
+                        <local:FontAwesomeIcon x:Name="iconMic" Margin="15,0" FontSize="25" TextColor="Green" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" />
+                        <local:FontAwesomeIcon x:Name="iconRepeat" Margin="15,0" FontSize="25" TextColor="Orange" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" />
+                        <local:FontAwesomeIcon x:Name="iconAlarm" Margin="15,0" FontSize="25" TextColor="Red" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" />
+                        <local:FontAwesomeIcon x:Name="iconFav" Margin="15,0" FontSize="25" TextColor="#C1C1C1" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" />
+                        <local:FontAwesomeIcon x:Name="iconPlay" Margin="15,0" FontSize="25" TextColor="Blue" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" />
+                    </StackLayout>
+                </RelativeLayout>-->
+            <StackLayout Orientation="Vertical" Padding="10,0,10,10" x:Name="layContent" local:LongPressedEffect.Command="{Binding Path=ParentContext.ItemLongPressCommand,Source={x:Reference cardDtlCell}}" local:LongPressedEffect.CommandParameter="{Binding .}">
+                <StackLayout.Effects>
+                    <local:LongPressedEffect />
+                </StackLayout.Effects>
+                <StackLayout Orientation="Vertical" IsVisible="{Binding showSubHeader}">
+                    <StackLayout Orientation="Horizontal">
+                        <local:FontAwesomeIcon x:Name="iconDot" FontSize="15" TextColor="#C1C1C1" VerticalTextAlignment="Center" />
+                        <Label FontSize="18" TextColor="Black" FontAttributes="Bold" Text="{Binding sub_index_dua_head}" VerticalTextAlignment="Center" Margin="2,0" />
+                    </StackLayout>
+                    <BoxView Color="#C1C1C1" HorizontalOptions="FillAndExpand" HeightRequest="1" />
+                </StackLayout>
+                <Label FontSize="{Binding fontsize}" FontFamily="AdobeArabic.otf#AdobeArabic" TextColor="Black" Text="{Binding english__arabic__dua}" VerticalTextAlignment="End" HorizontalOptions="EndAndExpand" Margin="2,0">
+                    <Label.HorizontalTextAlignment>
+                        <OnPlatform x:TypeArguments="TextAlignment">
+                            <On Platform="Android" Value="Start" />
+                            <On Platform="iOS" Value="End" />
+                        </OnPlatform>
+                    </Label.HorizontalTextAlignment>
+                </Label>
+                <Label FontSize="15" TextColor="#D34400" Text="{Binding transliteration}" VerticalTextAlignment="Center" Margin="2,3" />
+                <Label FontSize="15" TextColor="#005BBA" Text="{Binding translation}" VerticalTextAlignment="Center" Margin="2,3" />
+                <Label FontSize="13" TextColor="#00B627" Text="{Binding reported_by}" VerticalTextAlignment="Center" HorizontalTextAlignment="End" HorizontalOptions="End" Margin="2,0" />
+            </StackLayout>
+        </StackLayout>
+    </ContentView.Content>
+</ContentView>
+
+//**cs contentpage
+-- Add following line to get bindingcontext from parent
+
+public static readonly BindableProperty ParentContextProperty =
+            BindableProperty.Create("ParentContext", typeof(object), typeof(CardViewDetailTemplate), null, propertyChanged: OnParentContextPropertyChanged);
+
+        public object ParentContext
+        {
+            get { return GetValue(ParentContextProperty); }
+            set { SetValue(ParentContextProperty, value); }
+        }
+
+        private static void OnParentContextPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (newValue != oldValue && newValue != null)
+            {
+                (bindable as CardViewDetailTemplate).ParentContext = newValue;
+            }
+        }
+        
+//**cs LongPressedEffect**
+using System;
+using System.Windows.Input;
+using MyDua.Model;
+using Xamarin.Forms;
+
+namespace MyDua.Util
+{
+    public class LongPressedEffect : RoutingEffect
+    {
+        public LongPressedEffect() : base("MyApp.LongPressedEffect")
+        {
+        }
+
+        public static readonly BindableProperty CommandProperty = BindableProperty.CreateAttached("Command", typeof(ICommand), typeof(LongPressedEffect), (object)null);
+        //public static ICommand GetCommand(BindableObject view)
+        //{
+        //    var result = (ICommand)view.GetValue(CommandProperty);
+        //    return result;
+        //}
+
+        public static ICommand GetCommandLongClick(BindableObject view)
+        {
+            return (ICommand)view.GetValue(CommandProperty);
+             
+        }
+
+        public static ICommand GetCommandClick(BindableObject view)
+        {
+            return (ICommand)view.GetValue(CommandProperty);
+        }
+
+        public static void SetCommand(BindableObject view, ICommand value)
+        {
+            view.SetValue(CommandProperty, value);
+        }
+
+
+        public static readonly BindableProperty CommandParameterProperty = BindableProperty.CreateAttached("CommandParameter", typeof(object), typeof(LongPressedEffect), (object)null);
+        public static object GetCommandParameterLong(BindableObject view)
+        {
+            DuaListItem param = (DuaListItem)view.GetValue(CommandParameterProperty);
+            param.isLongClickPressed = true;
+            return param;
+        }
+
+        public static object GetCommandParameterShort(BindableObject view)
+        {
+            DuaListItem param = (DuaListItem)view.GetValue(CommandParameterProperty);
+            param.isLongClickPressed = false;
+            return param;
+        }
+
+        public static void SetCommandParameter(BindableObject view, object value)
+        {
+            view.SetValue(CommandParameterProperty, value);
+        }
+
+    }
+}
+
+//** ListItem**
+using System;
+using System.ComponentModel;
+using MyDua.Views;
+using Xamarin.Forms;
+
+namespace MyDua.Model
+{
+    public class DuaListItem : INotifyPropertyChanged
+    {
+        //public string Name { get; set; }
+        //public int Age { get; set; }
+
+        // I assume if color is   
+        // Green, then user has vote  
+        // Red, then user is below 18  
+        public Color HasVote { get; set; }
+
+        public string id { get; set; }
+        public string sub_id { get; set; }
+        public string dua_index { get; set; }
+        public string dua_index_comments { get; set; }
+        public string dua_sub_index { get; set; }
+        public string dua_sub_index_comments { get; set; }
+
+        public string sub_index_dua_head { get; set; }
+        public string english__arabic__dua { get; set; }
+        public string translation { get; set; }
+        public string transliteration { get; set; }
+        public string english_voice { get; set; }
+        public string arabic_voice { get; set; }
+        public string reported_by { get; set; }
+
+        public bool State_HeaderRepeat { get; set; }
+        public bool State_HeaderDays { get; set; }
+        public bool State_Status { get; set; }
+        public bool showSubHeader { get; set; }
+        public int mcount { get; set; }
+        public int dua_order { get; set; }
+        //public bool showSideMenus { get; set; }
+
+        public double fontsize { get; set; }
+
+        public bool isLongClickPressed { get; set; }
+        //public bool State
+        //{
+        //    get { return _state; }
+        //    set { _state = value; Notify("State"); }
+        //}
+
+
+
+
+
+
+        private bool _showSideMenus;
+        public bool showSideMenus
+        {
+            get
+            {
+                return _showSideMenus;
+            }
+
+            set
+            {
+                _showSideMenus = value;
+                OnPropertyChanged("showSideMenus");
+
+            }
+        }
+
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            var handler = PropertyChanged;
+            if (handler != null)
+                handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+}
+
+//**cs DuaDetailViewModel **//
+
+public ICommand ItemLongPressCommand { get; set; }
+--in constructor add following 
+ItemLongPressCommand = new Command(longpressit);
+
+public void longpressit(object obj)
+        {
+            var items = (DuaListItem)obj;
+            if (items.isLongClickPressed)
+            {
+                //App.Current.MainPage.DisplayAlert("Alert", "Long press clicked", "OK");
+                items.showSideMenus = true;
+                //OnPropertyChanged("showSideMenus");
+            }
+            //showSideMenus = true;
+
+            else
+            {
+                playAudio(items.arabic_voice);
+            }
+        }
+        
+
+**************************************ANDROID*********************************************
+
+//**cs AndroidLongPressedEffect**//
+using System;
+using MyDua.Droid;
+using MyDua.Util;
+using MyDua.Utils;
+using Xamarin.Forms;
+using Xamarin.Forms.Platform.Android;
+
+[assembly: ResolutionGroupName("MyApp")]
+[assembly: ExportEffect(typeof(AndroidLongPressedEffect), "LongPressedEffect")]
+namespace MyDua.Droid
+{
+    public class AndroidLongPressedEffect : PlatformEffect
+    {
+        private bool _attached;
+
+        /// <summary>
+        /// Initializer to avoid linking out
+        /// </summary>
+        public static void Initialize() { }
+
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="T:Yukon.Application.AndroidComponents.Effects.AndroidLongPressedEffect"/> class.
+        /// Empty constructor required for the odd Xamarin.Forms reflection constructor search
+        /// </summary>
+        public AndroidLongPressedEffect()
+        {
+        }
+
+        /// <summary>
+        /// Apply the handler
+        /// </summary>
+        protected override void OnAttached()
+        {
+            //because an effect can be detached immediately after attached (happens in listview), only attach the handler one time.
+            if (!_attached)
+            {
+                if (Control != null)
+                {
+                    Control.LongClickable = true;
+                    Control.LongClick += Control_LongClick;
+
+                    Control.Clickable = true;
+                    Control.Click+= delegate {
+                        Control_Click();
+                    };
+                }
+                else
+                {
+                    Container.LongClickable = true;
+                    Container.LongClick += Control_LongClick;
+
+                    Container.Clickable = true;
+                    Container.Click += delegate {
+                        Control_Click();
+                    };
+                }
+                _attached = true;
+            }
+        }
+
+        /// <summary>
+        /// Invoke the command if there is one
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="e">E.</param>
+        private void Control_LongClick(object sender, Android.Views.View.LongClickEventArgs e)
+        {
+            Console.WriteLine("Invoking long click command");
+            var command = LongPressedEffect.GetCommandLongClick(Element);
+            command?.Execute(LongPressedEffect.GetCommandParameterLong(Element));
+        }
+
+        private void Control_Click()
+        {
+            Console.WriteLine("Invoking click command");
+            var command = LongPressedEffect.GetCommandClick(Element);
+            command?.Execute(LongPressedEffect.GetCommandParameterShort(Element));
+        }
+        /// <summary>
+        /// Clean the event handler on detach
+        /// </summary>
+        protected override void OnDetached()
+        {
+            if (_attached)
+            {
+                if (Control != null)
+                {
+                    Control.LongClickable = true;
+                    Control.LongClick -= Control_LongClick;
+
+                    //Control.Clickable = true;
+                }
+                else
+                {
+                    Container.LongClickable = true;
+                    Container.LongClick -= Control_LongClick;
+                }
+                _attached = false;
+            }
+        }
+    }
+}
+
+**************************************IOS*********************************************
+using System;
+using System.ComponentModel;
+using MyDua.iOS;
+using MyDua.Util;
+using UIKit;
+using Xamarin.Forms;
+using Xamarin.Forms.Platform.iOS;
+
+[assembly: ResolutionGroupName("MyApp")]
+[assembly: ExportEffect(typeof(iOSLongPressedEffect), "LongPressedEffect")]
+namespace MyDua.iOS
+{
+    public class iOSLongPressedEffect : PlatformEffect
+    {
+        private bool _attached;
+        private readonly UILongPressGestureRecognizer _longPressRecognizer;
+        private readonly UITapGestureRecognizer _shortPressRecognizer;
+        //private readonly clic _longPressRecognizer;
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="T:Yukon.Application.iOSComponents.Effects.iOSLongPressedEffect"/> class.
+        /// </summary>
+        public iOSLongPressedEffect()
+        {
+            _longPressRecognizer = new UILongPressGestureRecognizer(HandleLongClick);
+            _shortPressRecognizer = new UITapGestureRecognizer(HandleShortClick);
+        }
+
+        /// <summary>
+        /// Apply the handler
+        /// </summary>
+        protected override void OnAttached()
+        {
+            //because an effect can be detached immediately after attached (happens in listview), only attach the handler one time
+            if (!_attached)
+            {
+                Container.AddGestureRecognizer(_longPressRecognizer);
+                Container.AddGestureRecognizer(_shortPressRecognizer);
+                _attached = true;
+            }
+        }
+
+        /// <summary>
+        /// Invoke the command if there is one
+        /// </summary>
+        private void HandleLongClick()
+        {
+
+            //AudioToolbox.SystemSound.Vibrate. PlayAlertSound();
+            var command = LongPressedEffect.GetCommandLongClick(Element);
+            command?.Execute(LongPressedEffect.GetCommandParameterLong(Element));
+        }
+
+        private void HandleShortClick()
+        {
+            var command = LongPressedEffect.GetCommandClick(Element);
+            command?.Execute(LongPressedEffect.GetCommandParameterShort(Element));
+        }
+        /// <summary>
+        /// Clean the event handler on detach
+        /// </summary>
+        protected override void OnDetached()
+        {
+            if (_attached)
+            {
+                Container.RemoveGestureRecognizer(_longPressRecognizer);
+                Container.RemoveGestureRecognizer(_shortPressRecognizer);
+                _attached = false;
+            }
+        }
+
+    }
+}
+
