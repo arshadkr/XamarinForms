@@ -1,5 +1,5 @@
-//Forms
-//xaml
+//************************************ FORMS ************************************
+// **xaml**
 <?xml version="1.0" encoding="utf-8"?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -7,6 +7,7 @@
     <ContentPage.Content>
     <StackLayout>
         <local:FontAwesomeIcon  x:Name="labeltest" Text="Welcome to Xamarin.Forms!" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" />
+        <local:FontAwesomeIcon x:Name="iconDot" FontSize="15" TextColor="#C1C1C1" VerticalTextAlignment="Center" />
     </StackLayout>
         </ContentPage.Content>
 </ContentPage>
@@ -14,3 +15,111 @@
 // **cs usage**
  var coolLabel = new FontAwesomeIcon(FontAwesomeIcon.Icon.Globe);
  labeltest.Text = coolLabel.Text;
+ 
+ // **cs FontAwesomeIcon
+ 
+ using System;
+using Xamarin.Forms;
+
+namespace MyDua.Util
+{
+    public class FontAwesomeIcon : Label
+    {
+        //Must match the exact "Name" of the font which you can get by double clicking the TTF in Windows
+        public static readonly string Typeface = "FontAwesome";
+        //public static readonly string mFontSize = "10";
+
+        public FontAwesomeIcon()
+        {
+            FontFamily = Typeface;
+            //FontSize = 30;
+
+        }
+
+        public FontAwesomeIcon(string fontAwesomeIcon = null, double fontSize = 10)
+        {
+            FontFamily = Typeface;    //iOS is happy with this, Android needs a renderer to add ".ttf"
+            Text = fontAwesomeIcon;
+            FontSize = fontSize;
+        }
+
+        /// <summary>
+        /// Get more icons from http://fortawesome.github.io/Font-Awesome/cheatsheet/
+        /// Tip: Just copy and past the icon picture here to get the icon
+        /// </summary>
+        public static class Icon
+        {
+            //public static readonly string Gear = "";
+            public static readonly string Globe = "";
+            public static readonly string Settings = "\uf085";
+            public static readonly string Info = "\uf129";
+            public static readonly string Record = "\uf130";
+            public static readonly string Alarm = "\uf0f3";
+            public static readonly string Heart = "\uf004";
+            public static readonly string List = "\uf03a";
+            public static readonly string Child = "\uf1ae";
+            public static readonly string Clock = "\uf017";
+            public static readonly string Dot = "\uf192";
+            public static readonly string Share = "\uf1e0";
+            public static readonly string Mic = "\uf130";
+            public static readonly string Play = "\uf04b";
+            public static readonly string Repeat = "\uf079";
+            public static readonly string iconHandArrow = "\uf0a4"; 
+
+        }
+    }
+}
+
+
+
+//************************************ ANDROID ************************************
+
+-- copyfontawesome ttf file to Asset Folder
+-- rename to FontAwesome.ttf
+
+// **cs FontAwesomeIconRenderer**
+using System;
+using Android.Content;
+using Android.Graphics;
+using MyDua;
+using MyDua.Droid;
+using MyDua.Util;
+using MyDua.Views;
+using Xamarin.Forms;
+using Xamarin.Forms.Platform.Android;
+
+[assembly: ExportRenderer(typeof(FontAwesomeIcon), typeof(FontAwesomeIconRenderer))]
+namespace MyDua.Droid
+{
+    public class FontAwesomeIconRenderer : LabelRenderer
+    {
+        public FontAwesomeIconRenderer(Context context) : base(context)
+        {
+            //AutoPackage = false;
+        }
+
+        protected override void OnElementChanged(ElementChangedEventArgs<Label> e)
+        {
+            base.OnElementChanged(e);
+            if (e.OldElement == null)
+            {
+                //The ttf in /Assets is CaseSensitive, so name it FontAwesome.ttf
+                Control.Typeface = Typeface.CreateFromAsset(Forms.Context.Assets, FontAwesomeIcon.Typeface + ".ttf");
+            }
+        }
+    }
+}
+
+
+
+//************************************ IOS ************************************
+
+-- copyfontawesome ttf file to Asset Folder
+-- rename to FontAwesome.ttf
+-- close project
+-- Edit Info.plist with texteditor and following lines.
+<string>Assets.xcassets/AppIcon.appiconset</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>FontAwesome.ttf</string>
+	</array>
