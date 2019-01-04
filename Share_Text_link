@@ -1,0 +1,15 @@
+*********************************FORMS*********************************
+-- Nuget package --> Plugin.Share
+//**USAGE**//
+Plugin.Share.CrossShare.Current.Share(new Plugin.Share.Abstractions.ShareMessage
+            {
+                Title = "My Dua",
+                Text = "Hellow",
+                Url = "pageline.in"
+            });
+*********************************Android*********************************   
+--NO CHANGES--
+
+*********************************IOS*********************************
+//FinishedLaunching -->Appdelegate
+Plugin.Share.ShareImplementation.ExcludedUIActivityTypes.Clear();
