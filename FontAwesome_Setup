@@ -11,6 +11,6 @@
         </ContentPage.Content>
 </ContentPage>
 
-//**cs usage**
+// **cs usage**
  var coolLabel = new FontAwesomeIcon(FontAwesomeIcon.Icon.Globe);
  labeltest.Text = coolLabel.Text;
